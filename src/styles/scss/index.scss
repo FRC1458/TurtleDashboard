@@ -1,0 +1,97 @@
+@import "variables";
+
+@import "darkly/_variables";
+
+@import "bootstrap/_bootstrap";
+@import "fontawesome/font-awesome";
+
+@import "darkly/_bootswatch";
+
+@import "pace.scss";
+
+.inactive-link {
+  pointer-events: none;
+  cursor: default;
+}
+
+.nav-centered {
+  vertical-align: middle;
+}
+
+.nav-icon-centered {
+  vertical-align: middle;
+  padding-left: 15px;
+}
+
+.nav-icon-centered-disabled {
+  vertical-align: middle;
+  padding-left: 15px;
+  color: darken(grey, 5%);
+}
+
+.nav-large-text {
+  font-size: 30px;
+}
+
+.nav-xlarge-text {
+  font-size: 60px;
+}
+
+.seperate-left {
+  padding-left: 100px;
+}
+
+.seperate-right {
+  padding-right: 100px;
+}
+
+.seperate-right-half {
+  padding-right: 40px;
+}
+
+// That one IE6 feature...
+.blink {
+  animation: blink-animation 1s steps(3, start) infinite;
+  -webkit-animation: blink-animation 1s steps(3, start) infinite;
+}
+
+@keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
+
+@-webkit-keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
+
+.visibility-hidden {
+  visibility: hidden;
+}
+
+.unselectable {
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.fill-parent {
+  width: 100%;
+  height:100%;
+}
+
+.panel-title {
+  font-size: 30px !important;
+}
+
+.white-btn {
+  color: white !important;
+}
+
+.big-icon {
+  font-size: 10em;
+}
