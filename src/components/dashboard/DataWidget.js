@@ -15,7 +15,9 @@ class DataWidget extends React.Component {
             resizeWidth: 350,
             resizeHeight: 300,
             resizeMinWidth: 180,
-            resizeMinHeight: 150
+            resizeMinHeight: 150,
+            gaugeMin: 0,
+            gaugeMax: 100
         };
 
         this.rename = this._rename.bind(this);
@@ -52,6 +54,28 @@ class DataWidget extends React.Component {
         let newState = Object.assign({}, this.state, {display});
 
         if(display == "GAUGE") {
+
+            vex.dialog.prompt({
+                message: "Enter the minimum value for the gauge (must be a number):",
+                callback: (gaugeMin) => {
+                    this.setState(Object.assign({}, this.state, {gaugeMin}));
+
+                    vex.dialog.prompt({
+                        message: "Enter the maximum value for the gauge (must be a number greater than minimum):",
+                        callback: (gaugeMax) => {
+                            this.setState(Object.assign({}, this.state, {gaugeMax}));
+                        }, beforeClose: function () {
+                            let val = $(this.rootEl).find(".vex-dialog-prompt-input").val();
+                            return isNumber(val) &&
+                                (parseFloat(val) > parseFloat(gaugeMin));
+                        }
+                    });
+
+                }, beforeClose: function () {
+                    return isNumber($(this.rootEl).find(".vex-dialog-prompt-input").val());
+                }
+            });
+
             newState.resizeWidth = 235;
             newState.resizeHeight = 235;
 
@@ -83,7 +107,7 @@ class DataWidget extends React.Component {
             break;
 
         case "GAUGE":
-            panelBody = (<Gauge value={parseFloat(this.props.val)} width={200} height={160} label="" valueLabelStyle={{fill: "#dddddd"}} min={9} max={14} />);
+            panelBody = (<Gauge value={parseFloat(this.props.val)} width={200} height={160} label="" valueLabelStyle={{fill: "#dddddd"}} min={this.state.gaugeMin} max={this.state.gaugeMax} />);
             break;
 
         case "CHECKMARK": {

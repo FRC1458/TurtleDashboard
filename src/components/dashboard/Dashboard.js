@@ -17,8 +17,10 @@ class Dashboard extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {Alliance: "BLUE", Location: 2, RobotState: "DISABLED",
-            Time: 165.0, Battery: 12.0, BrownOut: false, keys: [], children: [{index: "Battery", name: "Battery", type: "DATA"}]};
+
+        // state.type can be DATA or CHART
+        this.state = {Alliance: "BLUE", Location: 1, RobotState: "DISABLED",
+            Time: 165.0, Battery: 0.0, BrownOut: false, keys: [], children: [{index: "Battery", name: "Battery", type: "CHART"}]};
 
         io.on("update", (obj) => {
             console.log(obj);
@@ -53,6 +55,22 @@ class Dashboard extends React.Component {
 
             this.setState(s);
         });
+
+        this.addChild = this._addChild.bind(this);
+    }
+
+    _addChild(event){
+        console.log("add");
+        let target = $(event.target);
+        let key = target.attr("data-id");
+        console.log(key);
+
+        let children = Object.assign([], this.state.children);
+        children.push({index: key, name: key, type: "DATA"});
+
+        console.log(children);
+
+        this.setState(Object.assign({}, this.state, {children}));
     }
 
     render() {
@@ -121,13 +139,13 @@ class Dashboard extends React.Component {
                                         </a>
                                         <ul className="dropdown-menu">
                                             {this.state.keys.map((key) => {
-                                                if(EXCLUDED.indexOf(key) == -1) return (
-                                                    <li><a href="#">{key}</a></li>
+                                                if(EXCLUDED.indexOf(key) == -1 && key.indexOf("_PID") == -1) return (
+                                                    <li><a href="#" onClick={this.addChild} data-id={key}>{key}</a></li>
                                                 );
+                                                console.log(this.addChild);
                                             })}
                                             <li role="separator" className="divider"/>
-                                            <li><a href="#">Drive Control Viewer</a></li>
-                                            <li><a href="#">PID Calibration</a></li>
+                                            <li className="dropdown-header">PID Calibration</li>
                                         </ul>
                                     </div>
                                 </span>
