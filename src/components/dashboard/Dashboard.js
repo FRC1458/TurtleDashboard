@@ -1,12 +1,15 @@
 import React from "react";
 import BrownOutModal from "../BrownOutModal.js";
 import DataWidget from "./DataWidget.js";
+import ChartWidget from "./ChartWidget.js";
 import io from "../util/socket.js";
 
-const BATTERY_1 = 11.5;
-const BATTERY_2 = 12.0;
-const BATTERY_3 = 12.5;
-const BATTERY_4 = 13.0;
+// TODO Set Battery Icons
+// Placeholder Data
+const BATTERY_1 = 12;
+const BATTERY_2 = 13;
+const BATTERY_3 = 14;
+const BATTERY_4 = 15;
 
 const EXCLUDED = ["Alliance", "Location", "RobotState", "Time", "BrownOut", "RightAxis", "LeftAxis"];
 
@@ -14,7 +17,8 @@ class Dashboard extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {Alliance: "BLUE", Location: 2, RobotState: "DISABLED", Time: 165.0, Battery: 12.0, BrownOut: false, keys: []};
+        this.state = {Alliance: "BLUE", Location: 2, RobotState: "DISABLED",
+            Time: 165.0, Battery: 12.0, BrownOut: false, keys: [], children: [{index: "Battery", name: "Battery", type: "DATA"}]};
 
         io.on("update", (obj) => {
             console.log(obj);
@@ -151,7 +155,17 @@ class Dashboard extends React.Component {
                     </div>
                 </nav>
 
-                <DataWidget val={this.state.Battery.toString()} name="Battery"/>
+                {this.state.children.map((child) => {
+                    if(child.type === "DATA"){
+                        return (
+                            <DataWidget val={this.state[child.index].toString()} name={child.name}/>
+                        );
+                    } else if(child.type === "CHART"){
+                        return (
+                            <ChartWidget val={this.state[child.index]} name={child.name}/>
+                        );
+                    }
+                })}
 
                 <BrownOutModal />
             </div>
