@@ -26,13 +26,13 @@ const compiler = webpack(config);
 
 
 /**
- * Start server on port 3000
+ * Start server on port 8000
  */
-server.listen(3000, (error) => {
+server.listen(8000, (error) => {
     if (error) {
         console.error("Startup Error", {error});
     } else {
-        console.log("App started at http://localhost:3000".green);
+        console.log("App started at http://localhost:8000".green);
     }
 });
 
