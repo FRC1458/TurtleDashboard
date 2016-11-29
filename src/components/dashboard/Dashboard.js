@@ -3,6 +3,8 @@ import BrownOutModal from "../BrownOutModal.js";
 import DataWidget from "./DataWidget.js";
 import ChartWidget from "./ChartWidget.js";
 import io from "../util/socket.js";
+import ComponentTree from "react-component-tree";
+import _ from "underscore";
 
 // TODO Set Battery Icons
 // Placeholder Data
@@ -18,17 +20,20 @@ class Dashboard extends React.Component {
     constructor(props) {
         super(props);
 
-        // state.type can be DATA or CHART
+        // state.children.type can be DATA or CHART
         this.state = {Alliance: "BLUE", Location: 1, RobotState: "DISABLED",
-            Time: 165.0, Battery: 0.0, BrownOut: false, keys: [], children: [{index: "Battery", name: "Battery", type: "CHART"}]};
+            Time: 165.0, Battery: 0.0, BrownOut: false, keys: [], children: [{id: 0, index: "Battery", name: "Battery", type: "CHART"}], currentId: 1};
 
+        /*this.state = {Alliance: "BLUE", Location: 1, RobotState: "DISABLED",
+            Time: 165.0, Battery: 0.0, BrownOut: false, keys: [], children: []};
+           */
         io.on("update", (obj) => {
-            console.log(obj);
+            //console.log(obj);
 
             // Reassign the state into new object
             let objKeys = Object.keys(obj);
             let newKeys = Object.assign([], this.state.keys, objKeys);
-            console.log(newKeys);
+            //console.log(newKeys);
 
             let s = Object.assign({}, this.state);
             s.keys = newKeys;
@@ -51,12 +56,14 @@ class Dashboard extends React.Component {
                 new Audio(filename).play();
             }
 
-            console.log(s);
+            //console.log(s);
 
             this.setState(s);
         });
 
         this.addChild = this._addChild.bind(this);
+        this.addChildGraph = this._addChildGraph.bind(this);
+        this.save = this._save.bind(this);
     }
 
     _addChild(event){
@@ -66,9 +73,42 @@ class Dashboard extends React.Component {
         console.log(key);
 
         let children = Object.assign([], this.state.children);
-        children.push({index: key, name: key, type: "DATA"});
+        children.push({id: this.state.currentId, index: key, name: key, type: "DATA"});
+        //children.push((<DataWidget val={this.state[key].toString()} name={key}/>));
 
         console.log(children);
+
+        this.setState(Object.assign({}, this.state, {children, currentId: this.state.currentId + 1}));
+    }
+
+    _addChildGraph(event){
+        console.log("add");
+        let target = $(event.target);
+        let key = target.attr("data-id");
+        console.log(key);
+
+        let children = Object.assign([], this.state.children);
+        children.push({id: this.state.currentId, index: key, name: key, type: "CHART"});
+
+        console.log(children);
+
+        this.setState(Object.assign({}, this.state, {children, currentId: this.state.currentId + 1}));
+    }
+
+    _save(){
+        let data = JSON.stringify(ComponentTree.serialize(this));
+        alert(data);
+    }
+
+    getRemove(id){
+        return this._remove.bind(this, id);
+    }
+
+    _remove(id){
+        let children = Object.assign([], this.state.children);
+        let index = _.findIndex(children, {id});
+        if(index === -1) return;
+        children[index].type = "NONE";
 
         this.setState(Object.assign({}, this.state, {children}));
     }
@@ -80,7 +120,7 @@ class Dashboard extends React.Component {
 
         // Time
         let seconds = Math.floor(this.state.Time % 60.0).toString();
-        console.log(seconds);
+        //console.log(seconds);
         if(seconds.length == 1) seconds = "0" + seconds;
         let timeRemaining = Math.floor(this.state.Time / 60.0) + ":" + seconds;
         let blink = (this.state.Time < 20.0 && this.state.Time % 2 != 10) ? "blink" : "";
@@ -131,23 +171,35 @@ class Dashboard extends React.Component {
                                 </span>
 
                                 <span className="nav-centered">
-                                    <div className="btn-group">
-                                        <a href="#" className="btn btn-lg btn-info navbar-btn dropdown-toggle"
+                                    <div className="btn-group seperate-right-half">
+                                        <a href="#" className="btn btn-info navbar-btn dropdown-toggle"
                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-
-                                            Add Item <span className="caret" />
+                                            <i className="fa fa-plus fa-lg"/>
                                         </a>
+
                                         <ul className="dropdown-menu">
                                             {this.state.keys.map((key) => {
-                                                if(EXCLUDED.indexOf(key) == -1 && key.indexOf("_PID") == -1) return (
-                                                    <li><a href="#" onClick={this.addChild} data-id={key}>{key}</a></li>
-                                                );
-                                                console.log(this.addChild);
+                                                if(EXCLUDED.indexOf(key) == -1 && key.indexOf("_PID") == -1) return ([
+                                                    <li><a href="#" onClick={this.addChild} data-id={key}>{key}</a></li>,
+                                                    <li><a href="#" onClick={this.addChildGraph} data-id={key}>{key} (Graph)</a></li>
+                                                ]);
+                                                //console.log(this.addChild);
                                             })}
                                             <li role="separator" className="divider"/>
                                             <li className="dropdown-header">PID Calibration</li>
                                         </ul>
                                     </div>
+
+                                    <div className="btn-group">
+                                        <a href="#" className="btn btn-success navbar-btn" onClick={this.save}>
+                                            <i className="fa fa-floppy-o fa-lg"/>
+                                        </a>
+
+                                        <a href="#" className="btn btn-success navbar-btn">
+                                            <i className="fa fa-upload fa-lg"/>
+                                        </a>
+                                    </div>
+
                                 </span>
                             </p>
 
@@ -176,14 +228,18 @@ class Dashboard extends React.Component {
                 {this.state.children.map((child) => {
                     if(child.type === "DATA"){
                         return (
-                            <DataWidget val={this.state[child.index].toString()} name={child.name}/>
+                            <DataWidget val={this.state[child.index].toString()} name={child.name} remove={this.getRemove(child.id)} ref={child.id} />
                         );
                     } else if(child.type === "CHART"){
                         return (
-                            <ChartWidget val={this.state[child.index]} name={child.name}/>
+                            <ChartWidget val={this.state[child.index]} name={child.name} remove={this.getRemove(child.id)} ref={child.id} />
                         );
+                    } else {
+                        return false;
                     }
                 })}
+
+                {/*this.state.children*/}
 
                 <BrownOutModal />
             </div>

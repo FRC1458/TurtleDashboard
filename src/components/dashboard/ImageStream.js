@@ -9,20 +9,15 @@ class DataWidget extends React.Component {
         this.state = {
             color: "default", // default, primary, success, warning, danger, info
             title: props.name,
-            display: "TEXT", // TEXT, TEXTBOX, GAUGE, CHECKMARK
-            isNumber: isNumber(props.val),
-            isBoolean: isBoolean(props.val),
+            url: props.url,
             resizeWidth: 350,
             resizeHeight: 300,
             resizeMinWidth: 180,
-            resizeMinHeight: 150,
-            gaugeMin: 0,
-            gaugeMax: 100
+            resizeMinHeight: 150
         };
 
         this.rename = this._rename.bind(this);
         this.changeColor = this._changeColor.bind(this);
-        this.setDisplay = this._setDisplay.bind(this);
         this.remove = props.remove;
     }
 
@@ -48,77 +43,10 @@ class DataWidget extends React.Component {
         this.setState(Object.assign({}, this.state, {color}));
     }
 
-    _setDisplay(event) {
-        let target = $(event.target);
-        let display = target.attr("data-id");
-
-        let newState = Object.assign({}, this.state, {display});
-
-        if(display == "GAUGE") {
-
-            vex.dialog.prompt({
-                message: "Enter the minimum value for the gauge (must be a number):",
-                callback: (gaugeMin) => {
-                    this.setState(Object.assign({}, this.state, {gaugeMin}));
-
-                    vex.dialog.prompt({
-                        message: "Enter the maximum value for the gauge (must be a number greater than minimum):",
-                        callback: (gaugeMax) => {
-                            this.setState(Object.assign({}, this.state, {gaugeMax}));
-                        }, beforeClose: function () {
-                            let val = $(this.rootEl).find(".vex-dialog-prompt-input").val();
-                            return isNumber(val) &&
-                                (parseFloat(val) > parseFloat(gaugeMin));
-                        }
-                    });
-
-                }, beforeClose: function () {
-                    return isNumber($(this.rootEl).find(".vex-dialog-prompt-input").val());
-                }
-            });
-
-            newState.resizeWidth = 235;
-            newState.resizeHeight = 235;
-
-            newState.resizeMinWidth = 235;
-            newState.resizeMinHeight = 235;
-        } else {
-            newState.resizeWidth = 350;
-            newState.resizeHeight = 300;
-
-            newState.resizeMinWidth = 180;
-            newState.resizeMinHeight = 150;
-        }
-
-        this.setState(newState);
-    }
-
     render() {
-        let panelClass = "fill-parent panel panel-"+this.state.color;
-        let panelBody;
+        let cameraView = {
 
-        switch(this.state.display){
-
-        case "TEXT":
-            panelBody = (<span style={{"fontSize": "50px"}}>{this.props.val}</span>);
-            break;
-
-        case "TEXTBOX":
-            panelBody = (<input className="form-control input-lg" style={{"fontSize": "50px", "width": "100%"}} value={this.props.val}/>);
-            break;
-
-        case "GAUGE":
-            panelBody = (<Gauge value={parseFloat(this.props.val)} width={200} height={160} label="" valueLabelStyle={{fill: "#dddddd"}} min={this.state.gaugeMin} max={this.state.gaugeMax} />);
-            break;
-
-        case "CHECKMARK": {
-            let iconClass = "fa big-icon fa-" + (this.props.val === "true" ? "check-circle" : "times-circle");
-            let color = (this.props.val === "true" ? "green" : "red");
-            panelBody = (<i className={iconClass} style={{color}}/>);
-            break;
-        }
-
-        }
+        };
 
         return (
             <ResizableAndMovable x={20} y={20} width={this.state.resizeWidth} height={this.state.resizeHeight}
@@ -164,8 +92,8 @@ class DataWidget extends React.Component {
 
                     </div>
 
-                    <div className="panel-body">
-                        {panelBody}
+                    <div className="panel-body" style={cameraView}>
+
                     </div>
                 </div>
             </ResizableAndMovable>

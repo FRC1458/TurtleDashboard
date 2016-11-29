@@ -23,6 +23,7 @@ class ChartWidget extends React.Component {
         this.rename = this._rename.bind(this);
         this.changeColor = this._changeColor.bind(this);
         this.resetData = this._resetData.bind(this);
+        this.remove = props.remove;
     }
 
     _resetData() {
@@ -99,6 +100,7 @@ class ChartWidget extends React.Component {
                                 <ul className="dropdown-menu">
                                     <li><a href="#" onClick={this.rename}>Rename</a></li>
                                     <li><a href="#" onClick={this.resetData}>Reset Graph</a></li>
+                                    <li><a href="#" onClick={this.remove}>Remove</a></li>
 
                                     <li role="separator" className="divider"/>
                                     <li className="dropdown-header">Color</li>

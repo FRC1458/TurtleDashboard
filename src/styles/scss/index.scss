@@ -38,18 +38,18 @@
 }
 
 .seperate-left {
-  padding-left: 100px;
+  padding-left: 75px;
 }
 
 .seperate-right {
-  padding-right: 100px;
+  padding-right: 75px;
 }
 
 .seperate-right-half {
-  padding-right: 40px;
+  padding-right: 30px;
 }
 
-// That one IE6 feature...
+// Else it doesn't run on browsers newer than IE6...
 .blink {
   animation: blink-animation 1s steps(3, start) infinite;
   -webkit-animation: blink-animation 1s steps(3, start) infinite;
