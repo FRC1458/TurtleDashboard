@@ -1,8 +1,4 @@
-/**
- * (Testing only) Start test java server
- */
-//import "./java/testJavaServer";
-
+const NetworkTablesIP = "127.0.0.1";
 
 /**
  * Libraries
@@ -52,7 +48,7 @@ app.use(require("webpack-hot-middleware")(compiler));
  * API Setup
  */
 
-setupAPI(server);
+setupAPI(server, NetworkTablesIP);
 
 
 /**

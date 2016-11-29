@@ -6,11 +6,11 @@ java.classpath.push("ntcore-osx.jar");
 let obj = {};
 let first = true;
 
-export function setupAPI(server) {
+export function setupAPI(server, ip) {
 
     var NetworkTable = java.import("edu.wpi.first.wpilibj.networktables.NetworkTable");
     NetworkTable.setClientModeSync();
-    NetworkTable.setIPAddressSync("127.0.0.1");
+    NetworkTable.setIPAddressSync(ip);
 
     var SmartDashboard = NetworkTable.getTableSync("SmartDashboard");
 
