@@ -2,6 +2,7 @@ import React from "react";
 import BrownOutModal from "../BrownOutModal.js";
 import DataWidget from "./DataWidget.js";
 import ChartWidget from "./ChartWidget.js";
+import ImageStream from "./ImageStream.js";
 import io from "../util/socket.js";
 import ComponentTree from "react-component-tree";
 import _ from "underscore";
@@ -22,7 +23,7 @@ class Dashboard extends React.Component {
 
         // state.children.type can be DATA or CHART
         this.state = {Alliance: "BLUE", Location: 1, RobotState: "DISABLED",
-            Time: 165.0, Battery: 0.0, BrownOut: false, keys: [], children: [{id: 0, index: "Battery", name: "Battery", type: "CHART"}], currentId: 1};
+            Time: 165.0, Battery: 0.0, BrownOut: false, keys: [], children: [{id: 0, index: "Battery", name: "Battery", type: "CHART"}, {id: 1, name: "Front Camera", url: "/test/stream.jpg", type: "IMAGE"}], currentId: 1};
 
         /*this.state = {Alliance: "BLUE", Location: 1, RobotState: "DISABLED",
             Time: 165.0, Battery: 0.0, BrownOut: false, keys: [], children: []};
@@ -63,6 +64,7 @@ class Dashboard extends React.Component {
 
         this.addChild = this._addChild.bind(this);
         this.addChildGraph = this._addChildGraph.bind(this);
+        this.addChildImage = this._addChildImage.bind(this);
         this.save = this._save.bind(this);
     }
 
@@ -93,6 +95,22 @@ class Dashboard extends React.Component {
         console.log(children);
 
         this.setState(Object.assign({}, this.state, {children, currentId: this.state.currentId + 1}));
+    }
+
+    _addChildImage(){
+
+        vex.dialog.prompt({
+            message: "Enter a url for the image stream:",
+            callback: (url) => {
+                let children = Object.assign([], this.state.children);
+                children.push({id: this.state.currentId, name: "Camera", type: "IMAGE", url});
+
+                this.setState(Object.assign({}, this.state, {children, currentId: this.state.currentId + 1}));
+
+            }, beforeClose: function () {
+                return $(this.rootEl).find(".vex-dialog-prompt-input").val() !== "";
+            }
+        });
     }
 
     _save(){
@@ -167,7 +185,7 @@ class Dashboard extends React.Component {
 
                             <p className="navbar-text">
                                 <span className="nav-centered nav-xlarge-text seperate-right-half">
-                                    <span>####</span>
+                                    <span>1458</span>
                                 </span>
 
                                 <span className="nav-centered">
@@ -178,6 +196,8 @@ class Dashboard extends React.Component {
                                         </a>
 
                                         <ul className="dropdown-menu">
+                                            <li><a href="#" onClick={this.addChildImage}>Image Stream</a></li>
+                                            <li role="separator" className="divider"/>
                                             {this.state.keys.map((key) => {
                                                 if(EXCLUDED.indexOf(key) == -1 && key.indexOf("_PID") == -1) return ([
                                                     <li><a href="#" onClick={this.addChild} data-id={key}>{key}</a></li>,
@@ -234,12 +254,36 @@ class Dashboard extends React.Component {
                         return (
                             <ChartWidget val={this.state[child.index]} name={child.name} remove={this.getRemove(child.id)} ref={child.id} />
                         );
+                    } else if(child.type === "IMAGE"){
+                        return (
+                            <ImageStream name={child.name} url={child.url} remove={this.getRemove(child.id)} ref={child.id} />
+                        );
                     } else {
-                        return false;
+                        return false; // Render Nothing
                     }
                 })}
 
-                {/*this.state.children*/}
+                {/* Idea from https://github.com/FRCDashboard/FRCDashboard */}
+                <span className="robot-diagram-wrapper">
+
+                </span>
+
+                <svg id="robot-diagram" width="332" height="450">
+                    <text x="80" y="340">Robot Diagram</text>
+
+                    {/* Chassis */}
+                    <rect x="75" y="360" width="230" height="40" />
+                    <rect x="85" y="370" width="210" height="40" />
+
+                    {/* Wheels */}
+                    <circle cx="100" cy="410" r="25" />
+                    <circle cx="190" cy="410" r="25" />
+                    <circle cx="280" cy="410" r="25" />
+
+                    {/* Bumpers */}
+                    <rect x="60" y="380" width="250" height="30" />
+                    <text x="155" y="405" id="team" text-anchor="middle">1458</text>
+                </svg>
 
                 <BrownOutModal />
             </div>
