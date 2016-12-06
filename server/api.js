@@ -31,5 +31,10 @@ export function setupAPI(server, ip) {
                 io.emit("update", obj);
             }
         }), true);
+
+        socket.on("setAutonomous", (autoMode) => {
+            console.log("Set "+autoMode);
+            SmartDashboard.putNumber("SelectedAutoMode", autoMode);
+        });
     });
 }

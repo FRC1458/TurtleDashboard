@@ -23,6 +23,9 @@ table.putNumberSync("RightAxis", 0.0);
 
 table.putStringSync("Alliance", "NONE");
 
+table.putStringSync("AutoModes", "[\"High Bar\", \"Low Bar\", \"Turtwig\", \"2 Ball\", \"3 Disc\"]");
+table.putNumberSync("SelectedAutoMode", 0);
+
 
 // Show DS Number
 table.putNumberSync("Location", 1);

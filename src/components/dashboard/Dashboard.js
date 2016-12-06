@@ -3,6 +3,8 @@ import BrownOutModal from "../BrownOutModal.js";
 import DataWidget from "./DataWidget.js";
 import ChartWidget from "./ChartWidget.js";
 import ImageStream from "./ImageStream.js";
+import AutonomousChooser from "./AutonomousChooser.js";
+
 import io from "../util/socket.js";
 import ComponentTree from "react-component-tree";
 import _ from "underscore";
@@ -66,6 +68,7 @@ class Dashboard extends React.Component {
         this.addChildGraph = this._addChildGraph.bind(this);
         this.addChildImage = this._addChildImage.bind(this);
         this.save = this._save.bind(this);
+        this.setAutonomous = this._setAutonomous.bind(this);
     }
 
     _addChild(event){
@@ -129,6 +132,11 @@ class Dashboard extends React.Component {
         children[index].type = "NONE";
 
         this.setState(Object.assign({}, this.state, {children}));
+    }
+
+    _setAutonomous(SelectedAutoMode){
+        io.emit("setAutonomous", SelectedAutoMode);
+        this.setState(Object.assign({}, this.state, {SelectedAutoMode}));
     }
 
     render() {
@@ -263,6 +271,8 @@ class Dashboard extends React.Component {
                     }
                 })}
 
+                <AutonomousChooser selected={this.state.SelectedAutoMode || 0} modes={JSON.parse(this.state.AutoModes || "[\"None Available\"]")} setAutonomous={this.setAutonomous} />
+
                 {/* Idea from https://github.com/FRCDashboard/FRCDashboard */}
                 <span className="robot-diagram-wrapper">
 
@@ -285,7 +295,7 @@ class Dashboard extends React.Component {
                     <text x="155" y="405" id="team" text-anchor="middle">1458</text>
                 </svg>
 
-                <BrownOutModal />
+                <BrownOutModal/>
             </div>
         );
     }
