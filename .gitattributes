@@ -1,6 +1,6 @@
-src/styles/scss/bootstrap/*
-src/styles/scss/bootstrap/*/*
-src/styles/scss/bootstrap/*/*/*
+src/styles/scss/bootstrap/* linguist-vendored
+src/styles/scss/bootstrap/*/* linguist-vendored
+src/styles/scss/bootstrap/*/*/* linguist-vendored
 
-src/styles/scss/darkly/*
-src/styles/scss/fontawesome/*
+src/styles/scss/darkly/* linguist-vendored
+src/styles/scss/fontawesome/* linguist-vendored
