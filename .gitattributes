@@ -4,3 +4,4 @@ src/styles/scss/bootstrap/*/*/* linguist-vendored
 
 src/styles/scss/darkly/* linguist-vendored
 src/styles/scss/fontawesome/* linguist-vendored
+public/lib/* linguist-vendored
