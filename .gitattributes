@@ -1,7 +1,12 @@
+# This file hides "vendored" (externally downloaded and imported) files from indexing systems
+# ===========================================================================================
+
+# Bootstrap SCSS
 src/styles/scss/bootstrap/* linguist-vendored
 src/styles/scss/bootstrap/*/* linguist-vendored
 src/styles/scss/bootstrap/*/*/* linguist-vendored
 
+# Other Files (Mostly CSS/SCSS)
 src/styles/scss/darkly/* linguist-vendored
 src/styles/scss/fontawesome/* linguist-vendored
 public/lib/* linguist-vendored
