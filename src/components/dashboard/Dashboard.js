@@ -16,7 +16,7 @@ const BATTERY_2 = 13;
 const BATTERY_3 = 14;
 const BATTERY_4 = 15;
 
-const EXCLUDED = ["Alliance", "Location", "RobotState", "Time", "BrownOut", "RightAxis", "LeftAxis"];
+const EXCLUDED = ["Alliance", "Location", "RobotState", "Time", "BrownOut", "RightAxis", "LeftAxis", "SelectedAutoMode", "AutoModes"];
 
 class Dashboard extends React.Component {
 
@@ -250,12 +250,18 @@ class Dashboard extends React.Component {
                                             <li><a href="#" onClick={this.addChildImage}>Image Stream</a></li>
                                             <li role="separator" className="divider"/>
                                             {this.state.keys.map((key) => {
-                                                if(EXCLUDED.indexOf(key) == -1 && key.indexOf("_PID") == -1) return ([
-                                                    <li><a href="#" onClick={this.addChild} data-id={key}>{key}</a></li>,
-                                                    <li><a href="#" onClick={this.addChildGraph} data-id={key}>{key} (Graph)</a></li>
-                                                ]);
+                                                if(isNumber(this.state[key])){
+                                                    if(EXCLUDED.indexOf(key) == -1 /*&& key.indexOf("_PID") == -1*/) return ([
+                                                        <li><a href="#" onClick={this.addChild} data-id={key}>{key}</a></li>,
+                                                        <li><a href="#" onClick={this.addChildGraph} data-id={key}>{key} (Graph)</a></li>
+                                                    ]);
+                                                } else {
+                                                    if(EXCLUDED.indexOf(key) == -1 /*&& key.indexOf("_PID") == -1*/) return ([
+                                                        <li><a href="#" onClick={this.addChild} data-id={key}>{key}</a></li>
+                                                    ]);
+                                                }
                                                 //console.log(this.addChild);
-                                            })}
+                                            })} {/* TODO move PID stuff into the section below. Also need to fix -1 for time*/}
                                             <li role="separator" className="divider"/>
                                             <li className="dropdown-header">PID Calibration</li>
                                         </ul>
@@ -344,6 +350,10 @@ class Dashboard extends React.Component {
     }
 }
 
+
+function isNumber(n) {
+    return !isNaN(parseFloat(n)) && isFinite(n);
+}
 
 /*
  <div className="navbar-header">

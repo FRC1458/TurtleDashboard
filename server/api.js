@@ -19,7 +19,7 @@ export function setupAPI(app, ip) {
             let isNew = ((flags & 4) == 4) || ((flags & 1 == 1));
             console.log("Value Changed: "+key+"="+value+". New="+isNew);
             obj[key] = value;
-            console.log(obj);
+            //console.log(obj);
         }
     }), true);
 
@@ -40,9 +40,42 @@ export function setupAPI(app, ip) {
             res.end("INVALID_INPUT");
             return;
         }
-        console.log("Set "+autoMode);
+        console.log("Set to auto mode "+autoMode);
         SmartDashboard.putNumberSync("SelectedAutoMode", autoModeInt);
         obj["SelectedAutoMode"] = autoModeInt;
+        res.end("OK");
+    });
+
+    app.get("/putNumber", (req, res) => {
+        let key = req.query.key;
+        let value = req.query.value;
+        if(!key || !value) {
+            res.end("INVALID_INPUT");
+            return;
+        }
+        if(isNaN(value)) {
+            res.end("INVALID_INPUT");
+            return;
+        }
+        let valueFloat = parseFloat(value);
+
+        //console.log("Set "+key+" to "+valueFloat);
+        SmartDashboard.putNumberSync(key, valueFloat);
+        obj[key] = valueFloat;
+        res.end("OK");
+    });
+
+    app.get("/putString", (req, res) => {
+        let key = req.query.key;
+        let value = req.query.value;
+        if(!key || !value) {
+            res.end("INVALID_INPUT");
+            return;
+        }
+
+        //console.log("Set "+key+" to "+value);
+        SmartDashboard.putStringSync(key, value);
+        obj[key] = value;
         res.end("OK");
     });
 

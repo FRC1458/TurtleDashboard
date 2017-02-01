@@ -23,7 +23,14 @@ class DataWidget extends React.Component {
         this.rename = this._rename.bind(this);
         this.changeColor = this._changeColor.bind(this);
         this.setDisplay = this._setDisplay.bind(this);
+        this.setValue = this._setValue.bind(this);
         this.remove = props.remove;
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if(nextProps.val != this.props.val && this.state.display == "TEXTBOX") {
+            $(`[name=${this.props.name}]`).val(nextProps.val);
+        }
     }
 
     _rename() {
@@ -93,6 +100,14 @@ class DataWidget extends React.Component {
         this.setState(newState);
     }
 
+    _setValue(event) {
+        let target = $(event.target);
+        let value = target.val();
+
+        if(this.state.isNumber) $.get(`/putNumber?key=${escape(this.props.name)}&value=${escape(value)}`);
+        else $.get(`/putString?key=${escape(this.props.name)}&value=${escape(value)}`);
+    }
+
     render() {
         let panelClass = "fill-parent panel panel-"+this.state.color;
         let panelBody;
@@ -104,7 +119,7 @@ class DataWidget extends React.Component {
             break;
 
         case "TEXTBOX":
-            panelBody = (<input className="form-control input-lg" style={{"fontSize": "50px", "width": "100%"}} value={this.props.val}/>);
+            panelBody = (<input name={this.props.name} onChange={this.setValue} className="form-control input-lg" style={{"fontSize": "50px", "width": "100%"}} defaultValue={this.props.val}/>);
             break;
 
         case "GAUGE":
