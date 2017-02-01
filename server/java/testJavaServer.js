@@ -26,6 +26,14 @@ table.putStringSync("Alliance", "NONE");
 table.putStringSync("AutoModes", "[\"Turtwig\", \"Piplup\", \"Double Turtwig\"]");
 table.putNumberSync("SelectedAutoMode", 0);
 
+// PID
+let name = "TurtwigTestPID";
+let defaultConstants = {kP: 1.5, kI: 2, kD: 3.8};
+table.putStringSync(name+"_PID_DEF", "PID");
+table.putNumberSync(name+"_PID_kP", defaultConstants.kP);
+table.putNumberSync(name+"_PID_kI", defaultConstants.kI);
+table.putNumberSync(name+"_PID_kD", defaultConstants.kD);
+
 
 // Show DS Number
 table.putNumberSync("Location", 1);

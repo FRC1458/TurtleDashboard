@@ -9,27 +9,32 @@ class DataWidget extends React.Component {
         this.state = {
             color: "default", // default, primary, success, warning, danger, info
             title: props.name,
-            display: "TEXT", // TEXT, TEXTBOX, GAUGE, CHECKMARK
-            isNumber: isNumber(props.val),
-            isBoolean: isBoolean(props.val),
             resizeWidth: 350,
             resizeHeight: 300,
             resizeMinWidth: 180,
             resizeMinHeight: 150,
-            gaugeMin: 0,
-            gaugeMax: 100
+            numberName: props.name+"_"+Math.floor(Math.random() * 10000)
         };
 
         this.rename = this._rename.bind(this);
         this.changeColor = this._changeColor.bind(this);
         this.setDisplay = this._setDisplay.bind(this);
         this.setValue = this._setValue.bind(this);
+        this.submit = this._submit.bind(this);
         this.remove = props.remove;
     }
 
     componentWillReceiveProps(nextProps) {
-        if(nextProps.val != this.props.val && this.state.display == "TEXTBOX") {
-            $(`[name=${this.props.name}]`).val(nextProps.val);
+        if(nextProps.kP != this.props.kP) {
+            $("#"+this.state.numberName+"_kP").val(nextProps.kP);
+        }
+
+        if(nextProps.kI != this.props.kI) {
+            $("#"+this.state.numberName+"_kI").val(nextProps.kI);
+        }
+
+        if(nextProps.kD != this.props.kD) {
+            $("#"+this.state.numberName+"_kD").val(nextProps.kD);
         }
     }
 
@@ -100,6 +105,19 @@ class DataWidget extends React.Component {
         this.setState(newState);
     }
 
+    _submit(event) {
+        let kP = parseFloat($("#"+this.state.numberName+"_kP").val());
+        let kI = parseFloat($("#"+this.state.numberName+"_kI").val());
+        let kD = parseFloat($("#"+this.state.numberName+"_kD").val());
+        console.log(kP + " -- "+kI + " -- "+kD);
+
+        if(isNumber(kP) && isNumber(kI) && isNumber(kD)) {
+            $.get(`/putNumber?key=${escape(this.props.name+"_PID_kP")}&value=${escape(kP+"")}`);
+            $.get(`/putNumber?key=${escape(this.props.name+"_PID_kI")}&value=${escape(kI+"")}`);
+            $.get(`/putNumber?key=${escape(this.props.name+"_PID_kD")}&value=${escape(kD+"")}`);
+        }
+    }
+
     _setValue(event) {
         let target = $(event.target);
         let value = target.val();
@@ -111,29 +129,6 @@ class DataWidget extends React.Component {
     render() {
         let panelClass = "fill-parent panel panel-"+this.state.color;
         let panelBody;
-
-        switch(this.state.display){
-
-        case "TEXT":
-            panelBody = (<span style={{"fontSize": "50px"}}>{this.props.val}</span>);
-            break;
-
-        case "TEXTBOX":
-            panelBody = (<input name={this.props.name} onChange={this.setValue} className="form-control input-lg" style={{"fontSize": "50px", "width": "100%", "height": "100%"}} defaultValue={this.props.val}/>);
-            break;
-
-        case "GAUGE":
-            panelBody = (<Gauge value={parseFloat(this.props.val)} width={200} height={160} label="" valueLabelStyle={{fill: "#dddddd"}} min={this.state.gaugeMin} max={this.state.gaugeMax} />);
-            break;
-
-        case "CHECKMARK": {
-            let iconClass = "fa big-icon fa-" + (this.props.val === "true" ? "check-circle" : "times-circle");
-            let color = (this.props.val === "true" ? "green" : "red");
-            panelBody = (<i className={iconClass} style={{color}}/>);
-            break;
-        }
-
-        }
 
         return (
             <ResizableAndMovable x={20} y={20} width={this.state.resizeWidth} height={this.state.resizeHeight}
@@ -164,14 +159,6 @@ class DataWidget extends React.Component {
                                     <li><a href="#" onClick={this.changeColor} data-id="warning"><span className="text-warning">Warning</span></a></li>
                                     <li><a href="#" onClick={this.changeColor} data-id="danger"><span className="text-danger">Danger</span></a></li>
 
-                                    <li role="separator" className="divider"/>
-                                    <li className="dropdown-header">Display</li>
-
-                                    <li><a href="#" onClick={this.setDisplay} data-id="TEXT">Text</a></li>
-                                    <li><a href="#" onClick={this.setDisplay} data-id="TEXTBOX">Textbox</a></li>
-                                    {this.state.isNumber ? (<li><a href="#" onClick={this.setDisplay} data-id="GAUGE">Gauge</a></li>) : undefined}
-                                    {this.state.isBoolean ? (<li><a href="#" onClick={this.setDisplay} data-id="CHECKMARK">Boolean Icon</a></li>) : undefined}
-
                                 </ul>
                             </div>
                         </h1>
@@ -180,7 +167,52 @@ class DataWidget extends React.Component {
                     </div>
 
                     <div className="panel-body">
-                        {panelBody}
+
+                        <form className="form-horizontal">
+                            <div className="form-group">
+                                <label for="inputEmail3" className="col-sm-2 control-label">kP</label>
+                                <div className="col-sm-10">
+                                    <input className="form-control" id={this.state.numberName+"_kP"} defaultValue={this.props.kP}/>
+                                </div>
+                            </div>
+                            <div className="form-group">
+                                <label for="inputEmail3" className="col-sm-2 control-label">kI</label>
+                                <div className="col-sm-10">
+                                    <input className="form-control" id={this.state.numberName+"_kI"} defaultValue={this.props.kI} />
+                                </div>
+                            </div>
+                            <div className="form-group">
+                                <label for="inputEmail3" className="col-sm-2 control-label">kD</label>
+                                <div className="col-sm-10">
+                                    <input className="form-control" id={this.state.numberName+"_kD"} defaultValue={this.props.kD} />
+                                </div>
+                            </div>
+                        </form>
+                        <button type="button" onClick={this.submit} className="btn btn-primary" style={{"width": "100%"}}>Submit</button>
+
+                        {/*<div className="input-group input-group-sm">
+                            <span className="input-group-addon" style={{"fontSize": "25px"}}>kP</span>
+                            <input name={this.props.name} onChange={this.setValue}
+                                   className="form-control input-sm" type="text"
+                                   style={{"fontSize": "35px", "height": "100%"}}
+                                   defaultValue={this.props.val}/>
+                        </div>
+
+                        <div className="input-group input-group-sm">
+                            <span className="input-group-addon" style={{"fontSize": "25px"}}>kI</span>
+                            <input name={this.props.name} onChange={this.setValue}
+                                   className="form-control input-sm" type="text"
+                                   style={{"fontSize": "35px", "height": "100%"}}
+                                   defaultValue={this.props.val}/>
+                        </div>
+
+                        <div className="input-group input-group-sm">
+                            <span className="input-group-addon" style={{"fontSize": "25px"}}>kD</span>
+                            <input name={this.props.name} onChange={this.setValue}
+                                   className="form-control input-sm" type="text"
+                                   style={{"fontSize": "35px", "height": "100%"}}
+                                   defaultValue={this.props.val}/>
+                        </div>*/}
                     </div>
                 </div>
             </ResizableAndMovable>

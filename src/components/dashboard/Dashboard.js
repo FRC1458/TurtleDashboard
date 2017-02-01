@@ -4,8 +4,8 @@ import DataWidget from "./DataWidget.js";
 import ChartWidget from "./ChartWidget.js";
 import ImageStream from "./ImageStream.js";
 import AutonomousChooser from "./AutonomousChooser.js";
+import PidWidget from "./PidWidget.js";
 
-import io from "../util/socket.js";
 import ComponentTree from "react-component-tree";
 import _ from "underscore";
 
@@ -107,6 +107,7 @@ class Dashboard extends React.Component {
         }, 100);
 
         this.addChild = this._addChild.bind(this);
+        this.addPID = this._addPID.bind(this);
         this.addChildGraph = this._addChildGraph.bind(this);
         this.addChildImage = this._addChildImage.bind(this);
         this.save = this._save.bind(this);
@@ -121,6 +122,21 @@ class Dashboard extends React.Component {
 
         let children = Object.assign([], this.state.children);
         children.push({id: this.state.currentId, index: key, name: key, type: "DATA"});
+        //children.push((<DataWidget val={this.state[key].toString()} name={key}/>));
+
+        console.log(children);
+
+        this.setState(Object.assign({}, this.state, {children, currentId: this.state.currentId + 1}));
+    }
+
+    _addPID(event){
+        console.log("add");
+        let target = $(event.target);
+        let key = target.attr("data-id");
+        console.log(key);
+
+        let children = Object.assign([], this.state.children);
+        children.push({id: this.state.currentId, index: key.replace("_PID_DEF", ""), name: key.replace("_PID_DEF", ""), type: "PID"});
         //children.push((<DataWidget val={this.state[key].toString()} name={key}/>));
 
         console.log(children);
@@ -191,7 +207,13 @@ class Dashboard extends React.Component {
         let seconds = Math.floor(this.state.Time % 60.0).toString();
         //console.log(seconds);
         if(seconds.length == 1) seconds = "0" + seconds;
-        let timeRemaining = Math.floor(this.state.Time / 60.0) + ":" + seconds;
+        let minutes = Math.floor(this.state.Time / 60.0);
+        if(minutes > -1 && seconds > -1) {
+            var timeRemaining = minutes + ":" + seconds;
+        }
+        else{
+            var timeRemaining = "0:00";
+        }
         let blink = (this.state.Time < 20.0 && this.state.Time % 2 != 10) ? "blink" : "";
 
         // Battery Icon
@@ -250,20 +272,30 @@ class Dashboard extends React.Component {
                                             <li><a href="#" onClick={this.addChildImage}>Image Stream</a></li>
                                             <li role="separator" className="divider"/>
                                             {this.state.keys.map((key) => {
-                                                if(isNumber(this.state[key])){
-                                                    if(EXCLUDED.indexOf(key) == -1 /*&& key.indexOf("_PID") == -1*/) return ([
-                                                        <li><a href="#" onClick={this.addChild} data-id={key}>{key}</a></li>,
-                                                        <li><a href="#" onClick={this.addChildGraph} data-id={key}>{key} (Graph)</a></li>
-                                                    ]);
-                                                } else {
-                                                    if(EXCLUDED.indexOf(key) == -1 /*&& key.indexOf("_PID") == -1*/) return ([
-                                                        <li><a href="#" onClick={this.addChild} data-id={key}>{key}</a></li>
+                                                if(EXCLUDED.indexOf(key) == -1 && key.indexOf("_PID") == -1){
+                                                    if(isNumber(this.state[key])){
+                                                        return ([
+                                                            <li><a href="#" onClick={this.addChild} data-id={key}>{key}</a></li>,
+                                                            <li><a href="#" onClick={this.addChildGraph} data-id={key}>{key} (Graph)</a></li>
+                                                        ]);
+                                                    } else {
+                                                        return ([
+                                                            <li><a href="#" onClick={this.addChild} data-id={key}>{key}</a></li>
+                                                        ]);
+                                                    }
+                                                }
+                                                //console.log(this.addChild);
+                                            })} {/* TODO move PID stuff into the section below */}
+                                            <li role="separator" className="divider"/>
+                                            <li className="dropdown-header">PID Calibration</li>
+                                            {this.state.keys.map((key) => {
+                                                if(key.indexOf("_PID_DEF") > -1) {
+                                                    return ([
+                                                        <li><a href="#" onClick={this.addPID} data-id={key}>{key.replace("_PID_DEF", "")}</a></li>
                                                     ]);
                                                 }
                                                 //console.log(this.addChild);
-                                            })} {/* TODO move PID stuff into the section below. Also need to fix -1 for time*/}
-                                            <li role="separator" className="divider"/>
-                                            <li className="dropdown-header">PID Calibration</li>
+                                            })}
                                         </ul>
                                     </div>
 
@@ -315,10 +347,16 @@ class Dashboard extends React.Component {
                         return (
                             <ImageStream name={child.name} url={child.url} remove={this.getRemove(child.id)} ref={child.id} />
                         );
+                    } else if(child.type === "PID"){
+                        return (
+                            <PidWidget name={child.name} kP={this.state[child.name+"_PID_kP"]}
+                                       kI={this.state[child.name+"_PID_kI"]} kD={this.state[child.name+"_PID_kD"]} />
+                        );
                     } else {
                         return false; // Render Nothing
                     }
                 })}
+
 
                 <AutonomousChooser selected={this.state.SelectedAutoMode || 0} modes={JSON.parse(this.state.AutoModes || "[\"None Available\"]")} setAutonomous={this.setAutonomous} />
 
