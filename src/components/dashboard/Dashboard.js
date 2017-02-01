@@ -30,7 +30,7 @@ class Dashboard extends React.Component {
         /*this.state = {Alliance: "BLUE", Location: 1, RobotState: "DISABLED",
             Time: 165.0, Battery: 0.0, BrownOut: false, keys: [], children: []};
            */
-        io.on("update", (obj) => {
+        /*io.on("update", (obj) => {
             //console.log(obj);
 
             // Reassign the state into new object
@@ -62,7 +62,49 @@ class Dashboard extends React.Component {
             //console.log(s);
 
             this.setState(s);
-        });
+        });*/
+
+        setInterval(() => {
+            $.get("/api", (objString) => {
+                try {
+                    var obj = JSON.parse(objString);
+                } catch (e) {
+                    return;
+                }
+
+                //console.log(obj);
+
+                // Reassign the state into new object
+                let objKeys = Object.keys(obj);
+                let newKeys = Object.assign([], this.state.keys, objKeys);
+                //console.log(newKeys);
+
+                let s = Object.assign({}, this.state);
+                s.keys = newKeys;
+
+                for(var i = 0; i < objKeys.length; i++) {
+                    let key = objKeys[i];
+                    s[key] = obj[key];
+                }
+
+                // Handle brown-out issues
+                if(obj.BrownOut == true){
+                    $("#brownOutModal").modal("show");
+                } else {
+                    $("#brownOutModal").modal("hide");
+                }
+
+                // If state changes, play audio
+                if(obj.RobotState !== this.state.RobotState) {
+                    let filename = "/audio/Robot_"+obj.RobotState+".mp3";
+                    new Audio(filename).play();
+                }
+
+                //console.log(s);
+
+                this.setState(s);
+            });
+        }, 100);
 
         this.addChild = this._addChild.bind(this);
         this.addChildGraph = this._addChildGraph.bind(this);
@@ -135,12 +177,13 @@ class Dashboard extends React.Component {
     }
 
     _setAutonomous(SelectedAutoMode){
-        io.emit("setAutonomous", SelectedAutoMode);
+        //io.emit("setAutonomous", SelectedAutoMode);
+        $.get("/setAutonomous?autoMode="+parseInt(SelectedAutoMode));
         this.setState(Object.assign({}, this.state, {SelectedAutoMode}));
     }
 
     render() {
-        let navClass = "navbar navbar-" + (this.state.Alliance === "BLUE" ? "default" : "inverse");
+        let navClass = "navbar navbar-" + (this.state.Alliance === "RED" ? "inverse" : "default");
         let navIconClass = "fa fa-3x fa-laptop nav-icon-centered";
         let robotStatus = "Disabled";
 
@@ -239,11 +282,11 @@ class Dashboard extends React.Component {
 
                                 <i className={batteryClass} />
 
-                                <span className="nav-icon-centered nav-large-text">DS: {this.state.Location}</span>
+                                {/*<span className="nav-icon-centered nav-large-text">DS: {this.state.Location}</span>
 
                                 <i className={navIconClass+(this.state.Location !== 1 ? "-disabled" : "")} />
                                 <i className={navIconClass+(this.state.Location !== 2 ? "-disabled" : "")} />
-                                <i className={navIconClass+(this.state.Location !== 3 ? "-disabled" : "")} />
+                                <i className={navIconClass+(this.state.Location !== 3 ? "-disabled" : "")} />*/}
 
                                 <span className="nav-icon-centered nav-xlarge-text seperate-left">
                                     <span className={blink}>{timeRemaining}</span>

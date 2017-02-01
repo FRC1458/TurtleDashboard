@@ -23,7 +23,7 @@ table.putNumberSync("RightAxis", 0.0);
 
 table.putStringSync("Alliance", "NONE");
 
-table.putStringSync("AutoModes", "[\"High Bar\", \"Low Bar\", \"Turtwig\", \"2 Ball\", \"3 Disc\"]");
+table.putStringSync("AutoModes", "[\"Turtwig\", \"Piplup\", \"Double Turtwig\"]");
 table.putNumberSync("SelectedAutoMode", 0);
 
 

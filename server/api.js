@@ -1,4 +1,3 @@
-import socket from "socket.io";
 import java from "java";
 
 java.classpath.push("ntcore-osx.jar");
@@ -6,7 +5,7 @@ java.classpath.push("ntcore-osx.jar");
 let obj = {};
 let first = true;
 
-export function setupAPI(server, ip) {
+export function setupAPI(app, ip) {
 
     var NetworkTable = java.import("edu.wpi.first.wpilibj.networktables.NetworkTable");
     NetworkTable.setClientModeSync();
@@ -14,27 +13,40 @@ export function setupAPI(server, ip) {
 
     var SmartDashboard = NetworkTable.getTableSync("SmartDashboard");
 
-    var io = socket(server);
 
-    io.on("connection", (socket) => {
-        // New Clients should get the old data once
-        if(!first) {
-            io.emit("update", obj);
+    SmartDashboard.addTableListenerSync(java.newProxy("edu.wpi.first.wpilibj.tables.ITableListener", {
+        valueChangedEx(table, key, value, flags) {
+            let isNew = ((flags & 4) == 4) || ((flags & 1 == 1));
+            console.log("Value Changed: "+key+"="+value+". New="+isNew);
+            obj[key] = value;
+            console.log(obj);
         }
-        first = false;
-        SmartDashboard.addTableListenerSync(java.newProxy("edu.wpi.first.wpilibj.tables.ITableListener", {
-            valueChangedEx(table, key, value, flags) {
-                let isNew = ((flags & 4) == 4) || ((flags & 1 == 1));
-                console.log("Value Changed: "+key+"="+value+". New="+isNew);
-                obj[key] = value;
-                console.log(obj);
-                io.emit("update", obj);
-            }
-        }), true);
+    }), true);
 
-        socket.on("setAutonomous", (autoMode) => {
-            console.log("Set "+autoMode);
-            SmartDashboard.putNumber("SelectedAutoMode", autoMode);
-        });
+    /*socket.on("setAutonomous", (autoMode) => {
+        console.log("Set "+autoMode);
+        SmartDashboard.putNumber("SelectedAutoMode", autoMode);
+    });*/
+
+
+    app.get("/setAutonomous", (req, res) => {
+        let autoMode = req.query.autoMode;
+        if(!autoMode) {
+            res.end("INVALID_INPUT");
+            return;
+        }
+        let autoModeInt = parseInt(autoMode);
+        if(autoModeInt < 0 || autoModeInt > 25) {
+            res.end("INVALID_INPUT");
+            return;
+        }
+        console.log("Set "+autoMode);
+        SmartDashboard.putNumberSync("SelectedAutoMode", autoModeInt);
+        obj["SelectedAutoMode"] = autoModeInt;
+        res.end("OK");
+    });
+
+    app.get("/api", (req, res) => {
+        res.end(JSON.stringify(obj));
     });
 }

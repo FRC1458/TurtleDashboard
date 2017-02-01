@@ -11,9 +11,7 @@ class App extends React.Component {
     }
 
     componentWillMount() {
-        socket.on("message", (msg) => {
-            console.log(msg);
-        });
+        
     }
 }
 

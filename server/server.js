@@ -48,7 +48,7 @@ app.use(require("webpack-hot-middleware")(compiler));
  * API Setup
  */
 
-setupAPI(server, NetworkTablesIP);
+setupAPI(app, NetworkTablesIP);
 
 
 /**
