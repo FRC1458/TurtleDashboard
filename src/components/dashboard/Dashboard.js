@@ -16,19 +16,19 @@ const BATTERY_2 = 13;
 const BATTERY_3 = 14;
 const BATTERY_4 = 15;
 
-const EXCLUDED = ["Alliance", "Location", "RobotState", "Time", "BrownOut", "RightAxis", "LeftAxis", "SelectedAutoMode", "AutoModes"];
+const EXCLUDED = ["Alliance", "Location", "RobotState", "Time", "BrownOut", "SelectedAutoMode", "AutoModes"];
 
 class Dashboard extends React.Component {
 
     constructor(props) {
         super(props);
 
-        // state.children.type can be DATA or CHART
+        // state.childrenSet.type can be DATA or CHART
         this.state = {Alliance: "BLUE", Location: 1, RobotState: "DISABLED",
-            Time: 165.0, Battery: 0.0, BrownOut: false, keys: [], children: [{id: 0, index: "Battery", name: "Battery", type: "CHART"}, {id: 1, name: "Front Camera", url: "/test/stream.jpg", type: "IMAGE"}], currentId: 1};
+            Time: 165.0, Battery: 0.0, BrownOut: false, keys: [], childrenSet: [{id: 0, index: "Battery", name: "Battery", type: "CHART"}, {id: 1, name: "Front Camera", url: "/test/stream.jpg", type: "IMAGE"}], currentId: 1};
 
         /*this.state = {Alliance: "BLUE", Location: 1, RobotState: "DISABLED",
-            Time: 165.0, Battery: 0.0, BrownOut: false, keys: [], children: []};
+            Time: 165.0, Battery: 0.0, BrownOut: false, keys: [], childrenSet: []};
            */
         /*io.on("update", (obj) => {
             //console.log(obj);
@@ -120,13 +120,13 @@ class Dashboard extends React.Component {
         let key = target.attr("data-id");
         console.log(key);
 
-        let children = Object.assign([], this.state.children);
-        children.push({id: this.state.currentId, index: key, name: key, type: "DATA"});
-        //children.push((<DataWidget val={this.state[key].toString()} name={key}/>));
+        let childrenSet = Object.assign([], this.state.childrenSet);
+        childrenSet.push({id: this.state.currentId, index: key, name: key, type: "DATA"});
+        //childrenSet.push((<DataWidget val={this.state[key].toString()} name={key}/>));
 
-        console.log(children);
+        console.log(childrenSet);
 
-        this.setState(Object.assign({}, this.state, {children, currentId: this.state.currentId + 1}));
+        this.setState(Object.assign({}, this.state, {childrenSet, currentId: this.state.currentId + 1}));
     }
 
     _addPID(event){
@@ -135,13 +135,13 @@ class Dashboard extends React.Component {
         let key = target.attr("data-id");
         console.log(key);
 
-        let children = Object.assign([], this.state.children);
-        children.push({id: this.state.currentId, index: key.replace("_PID_DEF", ""), name: key.replace("_PID_DEF", ""), type: "PID"});
-        //children.push((<DataWidget val={this.state[key].toString()} name={key}/>));
+        let childrenSet = Object.assign([], this.state.childrenSet);
+        childrenSet.push({id: this.state.currentId, index: key.replace("_PID_DEF", ""), name: key.replace("_PID_DEF", ""), type: "PID"});
+        //childrenSet.push((<DataWidget val={this.state[key].toString()} name={key}/>));
 
-        console.log(children);
+        console.log(childrenSet);
 
-        this.setState(Object.assign({}, this.state, {children, currentId: this.state.currentId + 1}));
+        this.setState(Object.assign({}, this.state, {childrenSet, currentId: this.state.currentId + 1}));
     }
 
     _addChildGraph(event){
@@ -150,12 +150,12 @@ class Dashboard extends React.Component {
         let key = target.attr("data-id");
         console.log(key);
 
-        let children = Object.assign([], this.state.children);
-        children.push({id: this.state.currentId, index: key, name: key, type: "CHART"});
+        let childrenSet = Object.assign([], this.state.childrenSet);
+        childrenSet.push({id: this.state.currentId, index: key, name: key, type: "CHART"});
 
-        console.log(children);
+        console.log(childrenSet);
 
-        this.setState(Object.assign({}, this.state, {children, currentId: this.state.currentId + 1}));
+        this.setState(Object.assign({}, this.state, {childrenSet, currentId: this.state.currentId + 1}));
     }
 
     _addChildImage(){
@@ -163,10 +163,10 @@ class Dashboard extends React.Component {
         vex.dialog.prompt({
             message: "Enter a url for the image stream:",
             callback: (url) => {
-                let children = Object.assign([], this.state.children);
-                children.push({id: this.state.currentId, name: "Camera", type: "IMAGE", url});
+                let childrenSet = Object.assign([], this.state.childrenSet);
+                childrenSet.push({id: this.state.currentId, name: "Camera", type: "IMAGE", url});
 
-                this.setState(Object.assign({}, this.state, {children, currentId: this.state.currentId + 1}));
+                this.setState(Object.assign({}, this.state, {childrenSet, currentId: this.state.currentId + 1}));
 
             }, beforeClose: function () {
                 return $(this.rootEl).find(".vex-dialog-prompt-input").val() !== "";
@@ -175,8 +175,15 @@ class Dashboard extends React.Component {
     }
 
     _save(){
-        let data = JSON.stringify(ComponentTree.serialize(this));
-        alert(data);
+        let data = ComponentTree.serialize(this);
+        console.log(JSON.stringify(data));
+        for(var i = 0; i < data.state.childrenSet.length; i++) {
+            data.state.childrenSet[i].x = data.state.children[""+i].x;
+            data.state.childrenSet[i].y = data.state.children[""+i].y;
+            data.state.childrenSet[i].height = data.state.children[""+i].height;
+            data.state.childrenSet[i].width = data.state.children[""+i].width;
+        }
+        alert(JSON.stringify(data.state.childrenSet));
     }
 
     getRemove(id){
@@ -184,12 +191,12 @@ class Dashboard extends React.Component {
     }
 
     _remove(id){
-        let children = Object.assign([], this.state.children);
-        let index = _.findIndex(children, {id});
+        let childrenSet = Object.assign([], this.state.childrenSet);
+        let index = _.findIndex(childrenSet, {id});
         if(index === -1) return;
-        children[index].type = "NONE";
+        childrenSet[index].type = "NONE";
 
-        this.setState(Object.assign({}, this.state, {children}));
+        this.setState(Object.assign({}, this.state, {childrenSet}));
     }
 
     _setAutonomous(SelectedAutoMode){
@@ -334,23 +341,27 @@ class Dashboard extends React.Component {
                     </div>
                 </nav>
 
-                {this.state.children.map((child) => {
+                {this.state.childrenSet.map((child) => {
                     if(child.type === "DATA"){
                         return (
-                            <DataWidget val={this.state[child.index].toString()} name={child.name} remove={this.getRemove(child.id)} ref={child.id} />
+                            <DataWidget val={this.state[child.index].toString()} name={child.name} remove={this.getRemove(child.id)} ref={child.id}
+                                        x={child.x} y={child.y} width={child.width} height={child.height} />
                         );
                     } else if(child.type === "CHART"){
                         return (
-                            <ChartWidget val={this.state[child.index]} name={child.name} remove={this.getRemove(child.id)} ref={child.id} />
+                            <ChartWidget val={this.state[child.index]} name={child.name} remove={this.getRemove(child.id)} ref={child.id}
+                                         x={child.x} y={child.y} width={child.width} height={child.height} />
                         );
                     } else if(child.type === "IMAGE"){
                         return (
-                            <ImageStream name={child.name} url={child.url} remove={this.getRemove(child.id)} ref={child.id} />
+                            <ImageStream name={child.name} url={child.url} remove={this.getRemove(child.id)} ref={child.id}
+                                         x={child.x} y={child.y} width={child.width} height={child.height} />
                         );
                     } else if(child.type === "PID"){
                         return (
                             <PidWidget name={child.name} kP={this.state[child.name+"_PID_kP"]}
-                                       kI={this.state[child.name+"_PID_kI"]} kD={this.state[child.name+"_PID_kD"]} />
+                                       kI={this.state[child.name+"_PID_kI"]} kD={this.state[child.name+"_PID_kD"]}
+                                        x={child.x} y={child.y} width={child.width} height={child.height}/>
                         );
                     } else {
                         return false; // Render Nothing
@@ -360,7 +371,6 @@ class Dashboard extends React.Component {
 
                 <AutonomousChooser selected={this.state.SelectedAutoMode || 0} modes={JSON.parse(this.state.AutoModes || "[\"None Available\"]")} setAutonomous={this.setAutonomous} />
 
-                {/* Idea from https://github.com/FRCDashboard/FRCDashboard */}
                 <span className="robot-diagram-wrapper">
 
                 </span>

@@ -12,18 +12,24 @@ class DataWidget extends React.Component {
             display: "TEXT", // TEXT, TEXTBOX, GAUGE, CHECKMARK
             isNumber: isNumber(props.val),
             isBoolean: isBoolean(props.val),
-            resizeWidth: 350,
-            resizeHeight: 300,
             resizeMinWidth: 180,
             resizeMinHeight: 150,
             gaugeMin: 0,
-            gaugeMax: 100
+            gaugeMax: 100,
+            decimalPlaces: -1,
+            x: props.x || 20,
+            y: props.y || 20,
+            width: props.width || 350,
+            height: props.height || 300
         };
+        this.drag = this._drag.bind(this);
+        this.resize = this._resize.bind(this);
 
         this.rename = this._rename.bind(this);
         this.changeColor = this._changeColor.bind(this);
         this.setDisplay = this._setDisplay.bind(this);
         this.setValue = this._setValue.bind(this);
+        this.changeRounding = this._changeRounding.bind(this);
         this.remove = props.remove;
     }
 
@@ -31,6 +37,16 @@ class DataWidget extends React.Component {
         if(nextProps.val != this.props.val && this.state.display == "TEXTBOX") {
             $(`[name=${this.props.name}]`).val(nextProps.val);
         }
+    }
+
+    _drag(event, data) {
+        let newState = Object.assign({}, this.state, {x: data.position.left, y: data.position.top});
+        this.setState(newState);
+    }
+
+    _resize(location, data) {
+        let newState = Object.assign({}, this.state, {width: data.width, height: data.height});
+        this.setState(newState);
     }
 
     _rename() {
@@ -55,11 +71,27 @@ class DataWidget extends React.Component {
         this.setState(Object.assign({}, this.state, {color}));
     }
 
+    _changeRounding() {
+        vex.dialog.prompt({
+            message: "Enter the number of decimal places to round between 0 and 20 (Enter -1 for default):",
+            callback: (decimalPlaces) => {
+                this.setState(Object.assign({}, this.state, {decimalPlaces}));
+            }, beforeClose: function () {
+                var number = $(this.rootEl).find(".vex-dialog-prompt-input").val();
+                return isNumber(number) && parseFloat(number) >= -1 && parseFloat(number) <= 20;
+            }
+        });
+    }
+
     _setDisplay(event) {
         let target = $(event.target);
         let display = target.attr("data-id");
 
         let newState = Object.assign({}, this.state, {display});
+
+        if(display != "TEXT") {
+            newState.decimalPlaces = -1;
+        }
 
         if(display == "GAUGE") {
 
@@ -84,14 +116,14 @@ class DataWidget extends React.Component {
                 }
             });
 
-            newState.resizeWidth = 235;
-            newState.resizeHeight = 235;
+            newState.width = 235;
+            newState.height = 235;
 
             newState.resizeMinWidth = 235;
             newState.resizeMinHeight = 235;
         } else {
-            newState.resizeWidth = 350;
-            newState.resizeHeight = 300;
+            newState.width = 350;
+            newState.height = 300;
 
             newState.resizeMinWidth = 180;
             newState.resizeMinHeight = 150;
@@ -115,7 +147,11 @@ class DataWidget extends React.Component {
         switch(this.state.display){
 
         case "TEXT":
-            panelBody = (<span style={{"fontSize": "50px"}}>{this.props.val}</span>);
+            if(isNumber(this.props.val) && this.state.decimalPlaces > -1){
+                panelBody = (<span style={{"fontSize": "50px"}}>{parseFloat(this.props.val).toFixed(this.state.decimalPlaces)}</span>);
+            } else {
+                panelBody = (<span style={{"fontSize": "50px"}}>{this.props.val}</span>);
+            }
             break;
 
         case "TEXTBOX":
@@ -136,9 +172,10 @@ class DataWidget extends React.Component {
         }
 
         return (
-            <ResizableAndMovable x={20} y={20} width={this.state.resizeWidth} height={this.state.resizeHeight}
+            <ResizableAndMovable x={this.state.x} y={this.state.y} width={this.state.width} height={this.state.height}
                                  minWidth={this.state.resizeMinWidth}
-                                 minHeight={this.state.resizeMinHeight}>
+                                 minHeight={this.state.resizeMinHeight}
+                                 onResizeStop={this.resize} onDragStop={this.drag}>
 
                 <div className={panelClass}>
                     <div className="panel-heading">
@@ -153,6 +190,7 @@ class DataWidget extends React.Component {
                                 <ul className="dropdown-menu">
                                     <li><a href="#" onClick={this.rename}>Rename</a></li>
                                     <li><a href="#" onClick={this.remove}>Remove</a></li>
+                                    {this.state.isNumber ? (<li><a href="#" onClick={this.changeRounding}>Change Rounding</a></li>) : undefined}
 
                                     <li role="separator" className="divider"/>
                                     <li className="dropdown-header">Color</li>

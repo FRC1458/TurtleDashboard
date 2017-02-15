@@ -7,6 +7,14 @@ class AutonomousChooser extends React.Component {
     constructor(props) {
         super();
         this.change = this._change.bind(this);
+        this.state = {
+            x: props.x || 20,
+            y: props.y || 20,
+            width: props.width || 300,
+            height: props.height || 150
+        };
+        this.drag = this._drag.bind(this);
+        this.resize = this._resize.bind(this);
     }
 
     _change(event) {
@@ -15,13 +23,24 @@ class AutonomousChooser extends React.Component {
         this.props.setAutonomous(newSelected);
     }
 
+    _drag(event, data) {
+        let newState = Object.assign({}, this.state, {x: data.position.left, y: data.position.top});
+        this.setState(newState);
+    }
+
+    _resize(data) {
+        let newState = Object.assign({}, this.state, {width: data.width, height: data.height});
+        this.setState(newState);
+    }
+
     render() {
         let panelClass = "fill-parent panel panel-default";
 
         return (
-            <ResizableAndMovable x={20} y={20} width={300} height={150}
+            <ResizableAndMovable x={this.state.x} y={this.state.y} width={this.state.width} height={this.state.height}
                                  minWidth={300} maxWidth={300}
-                                 minHeight={150} maxHeight={150}>
+                                 minHeight={150} maxHeight={150}
+                                 onResizeStop={this.resize} onDragStop={this.drag}>
 
                 <div className={panelClass}>
                     <div className="panel-heading">

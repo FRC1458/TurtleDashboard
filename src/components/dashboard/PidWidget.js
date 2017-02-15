@@ -9,19 +9,33 @@ class DataWidget extends React.Component {
         this.state = {
             color: "default", // default, primary, success, warning, danger, info
             title: props.name,
-            resizeWidth: 350,
-            resizeHeight: 300,
             resizeMinWidth: 180,
             resizeMinHeight: 150,
-            numberName: props.name+"_"+Math.floor(Math.random() * 10000)
+            numberName: props.name+"_"+Math.floor(Math.random() * 10000),
+            x: props.x || 20,
+            y: props.y || 20,
+            width: props.width || 350,
+            height: props.height || 300
         };
+        this.drag = this._drag.bind(this);
+        this.resize = this._resize.bind(this);
 
         this.rename = this._rename.bind(this);
         this.changeColor = this._changeColor.bind(this);
-        this.setDisplay = this._setDisplay.bind(this);
         this.setValue = this._setValue.bind(this);
         this.submit = this._submit.bind(this);
         this.remove = props.remove;
+    }
+
+
+    _drag(event, data) {
+        let newState = Object.assign({}, this.state, {x: data.position.left, y: data.position.top});
+        this.setState(newState);
+    }
+
+    _resize(location, data) {
+        let newState = Object.assign({}, this.state, {width: data.width, height: data.height});
+        this.setState(newState);
     }
 
     componentWillReceiveProps(nextProps) {
@@ -60,50 +74,6 @@ class DataWidget extends React.Component {
         this.setState(Object.assign({}, this.state, {color}));
     }
 
-    _setDisplay(event) {
-        let target = $(event.target);
-        let display = target.attr("data-id");
-
-        let newState = Object.assign({}, this.state, {display});
-
-        if(display == "GAUGE") {
-
-            vex.dialog.prompt({
-                message: "Enter the minimum value for the gauge (must be a number):",
-                callback: (gaugeMin) => {
-                    this.setState(Object.assign({}, this.state, {gaugeMin}));
-
-                    vex.dialog.prompt({
-                        message: "Enter the maximum value for the gauge (must be a number greater than minimum):",
-                        callback: (gaugeMax) => {
-                            this.setState(Object.assign({}, this.state, {gaugeMax}));
-                        }, beforeClose: function () {
-                            let val = $(this.rootEl).find(".vex-dialog-prompt-input").val();
-                            return isNumber(val) &&
-                                (parseFloat(val) > parseFloat(gaugeMin));
-                        }
-                    });
-
-                }, beforeClose: function () {
-                    return isNumber($(this.rootEl).find(".vex-dialog-prompt-input").val());
-                }
-            });
-
-            newState.resizeWidth = 235;
-            newState.resizeHeight = 235;
-
-            newState.resizeMinWidth = 235;
-            newState.resizeMinHeight = 235;
-        } else {
-            newState.resizeWidth = 350;
-            newState.resizeHeight = 300;
-
-            newState.resizeMinWidth = 180;
-            newState.resizeMinHeight = 150;
-        }
-
-        this.setState(newState);
-    }
 
     _submit(event) {
         let kP = parseFloat($("#"+this.state.numberName+"_kP").val());
@@ -131,9 +101,10 @@ class DataWidget extends React.Component {
         let panelBody;
 
         return (
-            <ResizableAndMovable x={20} y={20} width={this.state.resizeWidth} height={this.state.resizeHeight}
+            <ResizableAndMovable x={this.state.x} y={this.state.y} width={this.state.width} height={this.state.height}
                                  minWidth={this.state.resizeMinWidth}
-                                 minHeight={this.state.resizeMinHeight}>
+                                 minHeight={this.state.resizeMinHeight}
+                                 onResizeStop={this.resize} onDragStop={this.drag}>
 
                 <div className={panelClass}>
                     <div className="panel-heading">

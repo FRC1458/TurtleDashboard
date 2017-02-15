@@ -3,7 +3,6 @@ import java from "java";
 java.classpath.push("ntcore-osx.jar");
 
 let obj = {};
-let keys = [];
 let first = true;
 
 export function setupAPI(app, ip) {
@@ -18,11 +17,8 @@ export function setupAPI(app, ip) {
     SmartDashboard.addTableListenerSync(java.newProxy("edu.wpi.first.wpilibj.tables.ITableListener", {
         valueChangedEx(table, key, value, flags) {
             let isNew = ((flags & 4) == 4) || ((flags & 1 == 1));
-            if(isNew) {
-                keys.push(key);
-            }
-            //console.log("Value Changed: "+key+"="+value+". New="+isNew);
-            //obj[key] = value;
+            console.log("Value Changed: "+key+"="+value+". New="+isNew);
+            obj[key] = value;
             //console.log(obj);
         }
     }), true);
@@ -84,10 +80,6 @@ export function setupAPI(app, ip) {
     });
 
     app.get("/api", (req, res) => {
-        var object = {};
-        for (key in keys) {
-            object[key] = SmartDashboard.getValueSync(key, 0);
-        }
-        res.end(JSON.stringify(object));
+        res.end(JSON.stringify(obj));
     });
 }
