@@ -10,17 +10,32 @@ class ImageStream extends React.Component {
             color: "default", // default, primary, success, warning, danger, info
             title: props.name,
             url: props.url,
-            resizeWidth: 320,
-            resizeHeight: 340,
             resizeMinWidth: 180,
-            resizeMinHeight: 150
+            resizeMinHeight: 150,
+            x: props.x || 20,
+            y: props.y || 20,
+            width: props.width || 320,
+            height: props.height || 340
         };
+        this.drag = this._drag.bind(this);
+        this.resize = this._resize.bind(this);
 
         this.rename = this._rename.bind(this);
         this.changeColor = this._changeColor.bind(this);
         this.changeURL = this._changeURL.bind(this);
 
         this.remove = props.remove;
+    }
+
+
+    _drag(event, data) {
+        let newState = Object.assign({}, this.state, {x: data.position.left, y: data.position.top});
+        this.setState(newState);
+    }
+
+    _resize(location, data) {
+        let newState = Object.assign({}, this.state, {width: data.width, height: data.height});
+        this.setState(newState);
     }
 
     _rename() {
@@ -70,9 +85,10 @@ class ImageStream extends React.Component {
         };
 
         return (
-            <ResizableAndMovable x={20} y={20} width={this.state.resizeWidth} height={this.state.resizeHeight}
+            <ResizableAndMovable x={this.state.x} y={this.state.y} width={this.state.width} height={this.state.height}
                                  minWidth={this.state.resizeMinWidth}
-                                 minHeight={this.state.resizeMinHeight}>
+                                 minHeight={this.state.resizeMinHeight}
+                                 onResizeStop={this.resize} onDragStop={this.drag}>
 
                 <div className={panelClass}>
                     <div className="panel-heading">

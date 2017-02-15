@@ -1,5 +1,4 @@
 import React, {PropTypes} from "react";
-import socket from "./util/socket.js";
 
 class App extends React.Component {
     render() {

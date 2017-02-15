@@ -1,4 +1,6 @@
 import "babel-polyfill";
+import ComponentTree from "react-component-tree";
+import Dashboard from "./components/dashboard/Dashboard.js"
 
 /**
  * React

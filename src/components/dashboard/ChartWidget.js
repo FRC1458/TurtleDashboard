@@ -14,8 +14,14 @@ class ChartWidget extends React.Component {
         this.state = {
             color: "default", // default, primary, success, warning, danger, info
             title: props.name,
-            data: [newItem]
+            data: [newItem],
+            x: props.x || 20,
+            y: props.y || 20,
+            width: props.width || 400,
+            height: props.height || 250
         };
+        this.drag = this._drag.bind(this);
+        this.resize = this._resize.bind(this);
 
         this.startTime = moment().valueOf();
 
@@ -24,6 +30,16 @@ class ChartWidget extends React.Component {
         this.changeColor = this._changeColor.bind(this);
         this.resetData = this._resetData.bind(this);
         this.remove = props.remove;
+    }
+
+    _drag(event, data) {
+        let newState = Object.assign({}, this.state, {x: data.position.left, y: data.position.top});
+        this.setState(newState);
+    }
+
+    _resize(location, data) {
+        let newState = Object.assign({}, this.state, {width: data.width, height: data.height});
+        this.setState(newState);
     }
 
     _resetData() {
@@ -84,8 +100,9 @@ class ChartWidget extends React.Component {
         let panelClass = "fill-parent panel panel-"+this.state.color;
 
         return (
-            <ResizableAndMovable x={20} y={20} width={400} height={250}
-                                 minWidth={200} minHeight={200}>
+            <ResizableAndMovable x={this.state.x} y={this.state.y} width={this.state.width} height={this.state.height}
+                                 minWidth={200} minHeight={200}
+                                 onResizeStop={this.resize} onDragStop={this.drag}>
 
                 <div className={panelClass}>
                     <div className="panel-heading">
