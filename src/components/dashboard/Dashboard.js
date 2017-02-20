@@ -25,7 +25,7 @@ class Dashboard extends React.Component {
 
         // state.childrenSet.type can be DATA or CHART
         this.state = {Alliance: "BLUE", Location: 1, RobotState: "DISABLED",
-            Time: 165.0, Battery: 0.0, BrownOut: false, keys: [], childrenSet: [{id: 0, index: "Battery", name: "Battery", type: "CHART"}, {id: 1, name: "Front Camera", url: "/test/stream.jpg", type: "IMAGE"}], currentId: 1};
+            Time: 165.0, Battery: 0.0, BrownOut: false, keys: [], childrenSet: [{id: 0, index: "Battery", name: "Battery", type: "CHART"}, {id: 1, name: "Front Camera", url: "http://roborio-1458-frc.local:5800/?action=stream", type: "IMAGE"}], currentId: 1};
 
         /*this.state = {Alliance: "BLUE", Location: 1, RobotState: "DISABLED",
             Time: 165.0, Battery: 0.0, BrownOut: false, keys: [], childrenSet: []};
@@ -343,8 +343,10 @@ class Dashboard extends React.Component {
 
                 {this.state.childrenSet.map((child) => {
                     if(child.type === "DATA"){
+			if(this.state[child.index]) var strVal = this.state[child.index].toString();
+			else var strVal = "undefined";
                         return (
-                            <DataWidget val={this.state[child.index].toString()} name={child.name} remove={this.getRemove(child.id)} ref={child.id}
+                            <DataWidget val={strVal} name={child.name} remove={this.getRemove(child.id)} ref={child.id}
                                         x={child.x} y={child.y} width={child.width} height={child.height} />
                         );
                     } else if(child.type === "CHART"){

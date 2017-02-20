@@ -24,6 +24,8 @@ class ImageStream extends React.Component {
         this.changeColor = this._changeColor.bind(this);
         this.changeURL = this._changeURL.bind(this);
 
+        this.refresh = this._refresh.bind(this);
+
         this.remove = props.remove;
     }
 
@@ -60,6 +62,14 @@ class ImageStream extends React.Component {
                 this.setState(Object.assign({}, this.state, {url}));
             }
         });
+    }
+
+    _refresh() {
+        var urlBackup = this.state.url;
+        this.setState(Object.assign({}, this.state, {url: "/test/stream.jpg"}));
+        setTimeout(() => {
+            this.setState(Object.assign({}, this.state, {url: urlBackup}));
+        }, 500);
     }
 
     _changeColor(event) {
@@ -102,6 +112,7 @@ class ImageStream extends React.Component {
                                 </a>
                                 <ul className="dropdown-menu">
                                     <li><a href="#" onClick={this.rename}>Rename</a></li>
+                                    <li><a href="#" onClick={this.refresh}>Refresh Stream</a></li>
                                     <li><a href="#" onClick={this.changeURL}>Change Stream URL</a></li>
                                     <li><a href="#" onClick={this.remove}>Remove</a></li>
 

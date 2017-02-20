@@ -1,7 +1,7 @@
-//const NetworkTablesIP = "10.14.58.70";
+const NetworkTablesIP = "10.14.58.102";
 //const NetworkTablesIP = "127.0.0.1";
 
-const NetworkTablesIP = "169.254.29.178";
+//const NetworkTablesIP = "169.254.29.178";
 
 /**
  * Libraries
